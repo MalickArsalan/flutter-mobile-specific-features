@@ -1,0 +1,18 @@
+[
+    {
+      "code": "L1",
+      "name": "Hiragana"
+    },
+    {
+      "code": "L2",
+      "name": "Katakana"
+    },
+    {
+      "code": "L3",
+      "name": "Kanji"
+    },
+    {
+      "code": "L4",
+      "name": "Putting all together"
+    }
+  ]
