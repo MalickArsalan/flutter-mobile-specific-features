@@ -4,6 +4,7 @@ import 'glyph-list.dart';
 import 'lesson-list.dart';
 import 'community.dart';
 import 'contact.dart';
+import 'sample-code.dart';
 
 void main() {
   runApp(GlobomanticsTabHome());
@@ -15,7 +16,7 @@ class GlobomanticsTabHome extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: DefaultTabController(
-        length: 4,
+        length: 5,
         child: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -24,6 +25,7 @@ class GlobomanticsTabHome extends StatelessWidget {
                 Tab(icon: Icon(Icons.school)),
                 Tab(icon: Icon(Icons.connect_without_contact)),
                 Tab(icon: Icon(Icons.mail_outline)),
+                Tab(icon: Icon(Icons.work_outline)),
               ],
             ),
             title: Text('Globoscript'),
@@ -34,6 +36,7 @@ class GlobomanticsTabHome extends StatelessWidget {
               LessonListWidget(),
               CommunityWidget(),
               ContactWidget(),
+              SampleCodeWidget(),
             ],
           ),
         ),

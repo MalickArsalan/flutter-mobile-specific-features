@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:audioplayers/audio_cache.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class GlyphListWidget extends StatefulWidget {
   @override
@@ -8,6 +13,8 @@ class GlyphListWidget extends StatefulWidget {
 
 class _GlyphList extends State<GlyphListWidget> {
   Future<List<dynamic>> glyphs;
+
+  AudioCache _audioCache;
 
   Future<List<dynamic>> fetchList() async {
     await Future.delayed(Duration(seconds: 5));
@@ -20,6 +27,15 @@ class _GlyphList extends State<GlyphListWidget> {
   void initState() {
     super.initState();
     glyphs = fetchList();
+    _audioCache = new AudioCache(
+        prefix: "assets/audio/glyphs/", fixedPlayer: new AudioPlayer());
+  }
+
+  @override
+  void dispose() {
+    _audioCache.fixedPlayer.stop();
+    _audioCache.fixedPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,11 +49,22 @@ class _GlyphList extends State<GlyphListWidget> {
             children: <Widget>[
               for (var glyph in glyphInfo)
                 ListTile(
-                  leading: Text(glyph["glyph"],
+                    leading: Text(
+                      glyph["glyph"],
                       style: TextStyle(
-                          fontSize: 23.0, fontWeight: FontWeight.bold)),
-                  title: Text(glyph["info"]),
-                )
+                          fontSize: 39.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueGrey),
+                    ),
+                    title: Text(glyph["info"],
+                        style: TextStyle(
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.blueAccent)),
+                    trailing: IconButton(
+                      icon: Icon(Icons.play_circle_fill_outlined),
+                      onPressed: () => _playShortSound(glyph["audio"]),
+                    ))
             ],
           );
         } else if (snapshot.hasError) {
@@ -60,5 +87,12 @@ class _GlyphList extends State<GlyphListWidget> {
         }
       },
     );
+  }
+
+  void _playShortSound(String asset) {
+    _audioCache.fixedPlayer.stop();
+    if (_audioCache.fixedPlayer.state != AudioPlayerState.PLAYING) {
+      _audioCache.play(asset);
+    }
   }
 }
