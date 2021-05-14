@@ -1,18 +1,27 @@
 [
-    {
-      "code": "L1",
-      "name": "Hiragana"
-    },
-    {
-      "code": "L2",
-      "name": "Katakana"
-    },
-    {
-      "code": "L3",
-      "name": "Kanji"
-    },
-    {
-      "code": "L4",
-      "name": "Putting all together"
-    }
-  ]
+  {
+    "code": "L0",
+    "name": "Japanese Script",
+    "audio": "script.mp3"
+  },
+  {
+    "code": "L1",
+    "name": "Hiragana",
+    "audio": "script.mp3"
+  },
+  {
+    "code": "L2",
+    "name": "Katakana",
+    "audio": "script.mp3"
+  },
+  {
+    "code": "L3",
+    "name": "Kanji",
+    "audio": "script.mp3"
+  },
+  {
+    "code": "L4",
+    "name": "Putting all together",
+    "audio": "script.mp3"
+  }
+]

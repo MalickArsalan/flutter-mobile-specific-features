@@ -1,22 +1,27 @@
 [
-    {
-      "glyph": "あ",
-      "info": "Sounds like A in father"
-    },
-    {
-      "glyph": "い",
-      "info": "Sounds like EE in tee"
-    },
-    {
-      "glyph": "う",
-      "info": "Sounds like OO in too"
-    },
-    {
-      "glyph": "え",
-      "info": "Sounds like AY in may, but without rounding the vowel"
-    },
-    {
-      "glyph": "お",
-      "info": "Sounds like O in no, but without rounding the vowel"
-    }
-  ]
+  {
+    "glyph": "あ",
+    "info": "Sounds like A in father",
+    "audio": "a.mp3"
+  },
+  {
+    "glyph": "い",
+    "info": "Sounds like EE in tee",
+    "audio": "i.mp3"
+  },
+  {
+    "glyph": "う",
+    "info": "Sounds like OO in too",
+    "audio": "u.mp3"
+  },
+  {
+    "glyph": "え",
+    "info": "Sounds like AY in may, but without rounding the vowel",
+    "audio": "e.mp3"
+  },
+  {
+    "glyph": "お",
+    "info": "Sounds like O in no, but without rounding the vowel",
+    "audio": "o.mp3"
+  }
+]
