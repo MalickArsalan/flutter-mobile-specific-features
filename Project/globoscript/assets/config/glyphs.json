@@ -2,26 +2,36 @@
   {
     "glyph": "あ",
     "info": "Sounds like A in father",
-    "audio": "a.mp3"
+    "audio": "a.mp3",
+    "video": "OneKana_A.mp4",
+    "web": "https://en.m.wikipedia.org/wiki/A_(kana)"
   },
   {
     "glyph": "い",
     "info": "Sounds like EE in tee",
-    "audio": "i.mp3"
+    "audio": "i.mp3",
+    "video": "OneKana_I.mp4",
+    "web": "https://en.m.wikipedia.org/wiki/I_(kana)"
   },
   {
     "glyph": "う",
     "info": "Sounds like OO in too",
-    "audio": "u.mp3"
+    "audio": "u.mp3",
+    "video": "OneKana_U.mp4",
+    "web": "https://en.m.wikipedia.org/wiki/U_(kana)"
   },
   {
     "glyph": "え",
     "info": "Sounds like AY in may, but without rounding the vowel",
-    "audio": "e.mp3"
+    "audio": "e.mp3",
+    "video": "OneKana_E.mp4",
+    "web": "https://en.m.wikipedia.org/wiki/E_(kana)"
   },
   {
     "glyph": "お",
     "info": "Sounds like O in no, but without rounding the vowel",
-    "audio": "o.mp3"
+    "audio": "o.mp3",
+    "video": "OneKana_O.mp4",
+    "web": "https://en.m.wikipedia.org/wiki/O_(kana)"
   }
 ]

@@ -29,6 +29,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
   audioplayers: ^0.18.3
+  video_player: ^2.1.1
+  webview_flutter: ^2.0.4
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +57,7 @@ flutter:
      - assets/audio/glyphs/e.mp3
      - assets/audio/glyphs/o.mp3
      - assets/audio/lessons/script.mp3
+     - assets/video/glyphs/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
