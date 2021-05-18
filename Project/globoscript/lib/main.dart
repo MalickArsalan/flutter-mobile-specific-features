@@ -36,7 +36,7 @@ class GlobomanticsTabHome extends StatelessWidget {
               LessonListWidget(),
               CommunityWidget(),
               ContactWidget(),
-              SampleCodeWidget(),
+              WebViewExample(),
             ],
           ),
         ),
