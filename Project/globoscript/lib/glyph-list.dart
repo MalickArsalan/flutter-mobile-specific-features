@@ -116,33 +116,136 @@ class _GlyphList extends State<GlyphListWidget> {
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return null;
+          return VideoDialogBox(
+            file: "assets/video/glyphs/" + filename,
+          );
         });
   }
 
   void _showWebContent(String url) {
     Navigator.push(
-        context,
-        PageRouteBuilder(
-            opaque: false,
-            pageBuilder: (BuildContext context, _, __) {
-              return Scaffold(
-                  appBar: AppBar(
-                    title: Text('Glyph Info'),
-                  ),
-                  body: WebView(
-                    initialUrl: url,
-                    navigationDelegate: (request) {
-                      if (request.url == url) {
-                        // Wikipedia redirects to .m domain for mobile phones,
-                        // so had to change address to the .m domain
-                        return NavigationDecision.navigate;
-                      } else {
-                        // The delegate is triggered for all requests, including the initial one
-                        return NavigationDecision.prevent;
-                      }
-                    },
-                  ));
-            }));
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (BuildContext context, _, __) {
+          return Scaffold(
+              appBar: AppBar(
+                title: Text('Glyph Info'),
+              ),
+              body: WebView(
+                initialUrl: url,
+                navigationDelegate: (request) {
+                  if (request.url == url) {
+                    // Wikipedia redirects to .m domain for mobile phones,
+                    // so had to change address to the .m domain
+                    return NavigationDecision.navigate;
+                  } else {
+                    // The delegate is triggered for all requests, including the initial one
+                    return NavigationDecision.prevent;
+                  }
+                },
+              ));
+        },
+      ),
+    );
+  }
+}
+
+class VideoDialogBox extends StatefulWidget {
+  final String file;
+  VideoDialogBox({Key key, this.file}) : super(key: key);
+
+  @override
+  _VideoDialogBoxState createState() => _VideoDialogBoxState();
+}
+
+class _VideoDialogBoxState extends State<VideoDialogBox> {
+  VideoPlayerController _controller;
+  bool _playClicked = false;
+  bool _replayClicked = false;
+  bool _slowPlay = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = VideoPlayerController.asset(widget.file)
+      // cascade operator (not technically an operator, just Dart syntax)
+      ..initialize().then((_) {
+        // autoplay the video as soon as initialized
+        _controller.play();
+      });
+
+    _controller.addListener(() {
+      log("Cideo Player State = ${_controller.value}");
+
+      if (_replayClicked ||
+          (_playClicked &&
+              (_controller.value.position == _controller.value.duration))) {
+        _controller.seekTo(Duration.zero);
+      }
+      _playClicked = false;
+      _replayClicked = false;
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: AlertDialog(
+        title: Text("Stroke Order"),
+        content: _controller.value.isInitialized
+            ? AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              )
+            : Text("..Loading"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _playClicked = true;
+              _controller.value.isPlaying
+                  ? _controller.pause()
+                  : _controller.play();
+            },
+            icon: Icon(
+                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow),
+          ),
+          IconButton(
+            onPressed: () {
+              _replayClicked = true;
+              _controller.play();
+            },
+            icon: Icon(Icons.replay),
+          ),
+          IconButton(
+            onPressed: () {
+              if (_slowPlay) {
+                _controller.setPlaybackSpeed(1.0);
+              } else {
+                _controller.setPlaybackSpeed(.33);
+              }
+              setState(() {
+                _slowPlay = !_slowPlay;
+              });
+            },
+            icon: Icon(Icons.slow_motion_video),
+          ),
+          IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.close))
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    log("video player disposed");
+    super.dispose();
   }
 }
