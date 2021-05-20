@@ -7,21 +7,25 @@
   {
     "code": "L1",
     "name": "Hiragana",
+    "page": "https://en.wikipedia.org/wiki/Hiragana",
     "audio": "script.mp3"
   },
   {
     "code": "L2",
     "name": "Katakana",
+    "page": "https://en.wikipedia.org/wiki/Katakana",
     "audio": "script.mp3"
   },
   {
     "code": "L3",
     "name": "Kanji",
+    "page": "https://en.wikipedia.org/wiki/Kanji",
     "audio": "script.mp3"
   },
   {
     "code": "L4",
     "name": "Putting all together",
+    "page": "https://en.wikipedia.org/wiki/Japanese_writing_system",
     "audio": "script.mp3"
   }
 ]
