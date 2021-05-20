@@ -1,278 +1,160 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-const String kInitialUrl = 'https://flutter.dev';
-
-const String kNavigationExamplePage = '''
-<!DOCTYPE html><html>
-<head><title>Navigation Delegate Example</title></head>
-<body style="font-size: 33pt">
-<p>
-The navigation delegate is set to block navigation to the youtube website.
-</p>
-<ul>
-<ul><a href="https://www.youtube.com/">https://www.youtube.com/</a></ul>
-<ul><a href="https://www.google.com/">https://www.google.com/</a></ul>
-</ul>
-</body>
-</html>
-''';
-
-class WebViewExample extends StatefulWidget {
+class SampleCodeWidget extends StatefulWidget {
   @override
-  _WebViewExampleState createState() => _WebViewExampleState();
+  _SampleCodeState createState() {
+    return _SampleCodeState();
+  }
 }
 
-class _WebViewExampleState extends State<WebViewExample> {
-  final Completer<WebViewController> _controller = Completer();
+class _SampleCodeState extends State<SampleCodeWidget> {
+  bool forceSafariVC = false;
+  bool forceWebView = false;
+  bool enableJavaScript = false;
+  bool enableDomStorage = false;
+  // bool universalLinksOnly = false;
+  Brightness statusBarBrightness = Brightness.dark;
+  String urlString = "";
 
-  @override
-  void initState() {
-    super.initState();
-    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('WebView Example'),
-        // This drop down menu demonstrates that Flutter widgets can be shown over the web view.
-        actions: <Widget>[
-          NavigationControls(_controller.future),
-          PopupWebviewMenu(_controller.future),
-        ],
-      ),
-      // We're using a Builder here so we have a context that is below the ScaffoldMessenger
-      // to allow calling ScaffoldMessenger.of(context) so we can show a snackbar.
-      body: Builder(builder: (BuildContext context) {
-        return WebView(
-          initialUrl: kInitialUrl,
-          javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (WebViewController webViewController) {
-            _controller.complete(webViewController);
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(13.0),
+          child: TextField(
+            onChanged: (value) {
+              setState(() => urlString = value);
+            },
+            decoration: InputDecoration(
+              labelText: 'URL',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        ListTile(
+          title: Text(
+            'forceSafariVC',
+          ),
+          leading: Switch(
+              value: forceSafariVC,
+              activeColor: Color(Colors.blueAccent.value),
+              onChanged: (bool value) {
+                setState(() {
+                  forceSafariVC = value;
+                });
+              }),
+        ),
+        ListTile(
+          title: Text(
+            'forceWebView',
+          ),
+          leading: Switch(
+              value: forceWebView,
+              activeColor: Color(Colors.blueAccent.value),
+              onChanged: (bool value) {
+                setState(() {
+                  forceWebView = value;
+                });
+              }),
+        ),
+        ListTile(
+          title: Text(
+            'enableJavaScript',
+          ),
+          leading: Switch(
+              value: enableJavaScript,
+              activeColor: Color(Colors.blueAccent.value),
+              onChanged: (bool value) {
+                setState(() {
+                  enableJavaScript = value;
+                });
+              }),
+        ),
+        ListTile(
+          title: Text(
+            'enableDomStorage',
+          ),
+          leading: Switch(
+              value: enableDomStorage,
+              activeColor: Color(Colors.blueAccent.value),
+              onChanged: (bool value) {
+                setState(() {
+                  enableDomStorage = value;
+                });
+              }),
+        ),
+        // ListTile(
+        //   title: Text(
+        //     'universalLinksOnly',
+        //   ),
+        //   leading: Switch(
+        //       value: universalLinksOnly,
+        //       activeColor: Color(Colors.blueAccent.value),
+        //       onChanged: (bool value) { setState(() { universalLinksOnly = value; }); }
+        //   ),
+        // ),
+        ListTile(
+          title: Text(
+            'statusBarBrightness',
+          ),
+          leading: Switch(
+              value: statusBarBrightness == Brightness.light,
+              activeColor: Color(Colors.black.value),
+              inactiveThumbColor: Color(Colors.white.value),
+              onChanged: (bool value) {
+                setState(() {
+                  statusBarBrightness = (statusBarBrightness == Brightness.light
+                      ? Brightness.dark
+                      : Brightness.light);
+                });
+              }),
+        ),
+        TextButton(
+          child: Text('Can Launch URL?'),
+          onPressed: () async {
+            bool isOk = await canLaunch(urlString);
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Can Launch the URL?"),
+                    content: Text(isOk ? "YES, PLEASE :)" : "NO, SORRY :("),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Ok',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ],
+                  );
+                });
           },
-          navigationDelegate: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.youtube.com/')) {
-              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('blocking navigation to $request'),
-              ));
-              return NavigationDecision.prevent;
-            }
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('allowing navigation to $request'),
-            ));
-            return NavigationDecision.navigate;
-          },
-          onPageStarted: (String url) {
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('page started loading: $url'),
-            ));
-          },
-          onPageFinished: (String url) {
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('page finished loading: $url'),
-            ));
-          },
-          gestureNavigationEnabled: true,
-        );
-      }),
-      floatingActionButton: favoriteButton(),
-    );
-  }
-
-  Widget favoriteButton() {
-    return FutureBuilder<WebViewController>(
-        future: _controller.future,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return FloatingActionButton(
-              onPressed: () async {
-                final String url = await snapshot.data.currentUrl();
-                ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Favorited $url')),
-                );
-              },
-              child: const Icon(Icons.favorite),
-            );
-          }
-          return Container();
-        });
-  }
-}
-
-enum MenuOptions {
-  clearCookies,
-  clearCache,
-  navigationDelegate,
-}
-
-class PopupWebviewMenu extends StatelessWidget {
-  PopupWebviewMenu(this.controller);
-
-  final Future<WebViewController> controller;
-  final CookieManager cookieManager = CookieManager();
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<WebViewController>(
-      future: controller,
-      builder: (context, controller) {
-        return PopupMenuButton<MenuOptions>(
-          onSelected: (MenuOptions value) {
-            switch (value) {
-              case MenuOptions.clearCookies:
-                _onClearCookies(context);
-                break;
-              case MenuOptions.clearCache:
-                _onClearCache(controller.data, context);
-                break;
-              case MenuOptions.navigationDelegate:
-                _onNavigationDelegateExample(controller.data, context);
-                break;
-            }
-          },
-          itemBuilder: (BuildContext context) => <PopupMenuItem<MenuOptions>>[
-            const PopupMenuItem<MenuOptions>(
-              value: MenuOptions.clearCookies,
-              child: Text('Clear cookies'),
-            ),
-            const PopupMenuItem<MenuOptions>(
-              value: MenuOptions.clearCache,
-              child: Text('Clear cache'),
-            ),
-            const PopupMenuItem<MenuOptions>(
-              value: MenuOptions.navigationDelegate,
-              child: Text('Navigation Delegate example'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _onClearCache(WebViewController controller, BuildContext context) async {
-    await controller.clearCache();
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("Cache cleared."),
-    ));
-  }
-
-  void _onClearCookies(BuildContext context) async {
-    final bool hadCookies = await cookieManager.clearCookies();
-    String message = 'There were cookies. Now, they are gone!';
-    if (!hadCookies) {
-      message = 'There are no cookies.';
-    }
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-    ));
-  }
-
-  void _onNavigationDelegateExample(
-      WebViewController controller, BuildContext context) async {
-    final String contentBase64 =
-        base64Encode(const Utf8Encoder().convert(kNavigationExamplePage));
-    await controller.loadUrl('data:text/html;base64,$contentBase64');
-  }
-}
-
-class NavigationControls extends StatelessWidget {
-  const NavigationControls(this._webViewControllerFuture)
-      : assert(_webViewControllerFuture != null);
-
-  final Future<WebViewController> _webViewControllerFuture;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<WebViewController>(
-      future: _webViewControllerFuture,
-      builder:
-          (BuildContext context, AsyncSnapshot<WebViewController> snapshot) {
-        final bool webViewReady =
-            snapshot.connectionState == ConnectionState.done;
-        final WebViewController controller = snapshot.data;
-        return Row(
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.home),
-              onPressed: !webViewReady
-                  ? null
-                  : () async {
-                      if (await controller.canGoBack()) {
-                        await controller.goBack();
-                      } else {
-                        await controller.loadUrl(kInitialUrl);
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Going home...")),
-                        );
-                        return;
-                      }
-                    },
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
-              onPressed: !webViewReady
-                  ? null
-                  : () async {
-                      if (await controller.canGoBack()) {
-                        await controller.goBack();
-                      } else {
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("No back history item")),
-                        );
-                        return;
-                      }
-                    },
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
-              onPressed: !webViewReady
-                  ? null
-                  : () async {
-                      if (await controller.canGoForward()) {
-                        await controller.goForward();
-                      } else {
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("No forward history item")),
-                        );
-                        return;
-                      }
-                    },
-            ),
-            IconButton(
-              icon: const Icon(Icons.replay),
-              onPressed: !webViewReady
-                  ? null
-                  : () {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Reloading page...")),
-                      );
-                      controller.reload();
-                    },
-            ),
-          ],
-        );
-      },
+        ),
+        FutureBuilder(
+            future: canLaunch(urlString),
+            builder: (context, snapshot) {
+              return TextButton(
+                  child: Text('Launch URL'),
+                  onPressed: snapshot.hasData && snapshot.data
+                      ? () {
+                          launch(
+                            urlString,
+                            forceSafariVC: forceSafariVC,
+                            statusBarBrightness: statusBarBrightness,
+                            forceWebView: forceWebView,
+                            enableJavaScript: enableJavaScript,
+                            enableDomStorage: enableDomStorage,
+                            // universalLinksOnly: universalLinksOnly,
+                          );
+                        }
+                      : null);
+            })
+      ],
     );
   }
 }
