@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 class LessonListWidget extends StatefulWidget {
   @override
   State<LessonListWidget> createState() {
@@ -63,33 +65,6 @@ class _LessonList extends State<LessonListWidget> {
     _lessons = fetchList();
   }
 
-  @override
-  void dispose() {
-    _lessonPlayer.stop();
-    _lessonPlayer.dispose();
-    super.dispose();
-  }
-
-  void _togglePause() {
-    setState(() {
-      if (_lessonPlayer.state == AudioPlayerState.PLAYING)
-        _lessonPlayer.pause();
-      else
-        _lessonPlayer.resume();
-    });
-  }
-
-  void _playLesson(dynamic lesson) {
-    _lessonPlayer.stop();
-    _audioCache.play(lesson["audio"]);
-    setState(() => _lessonPlaying = lesson);
-  }
-
-  void _stopPlayingLesson() {
-    _lessonPlayer.stop();
-    setState(() => _lessonPlaying = null);
-  }
-
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: _lessons,
@@ -112,17 +87,24 @@ class _LessonList extends State<LessonListWidget> {
                             fontSize: 11.0,
                             fontWeight: FontWeight.normal,
                             color: Colors.blueAccent)),
-                    trailing: lesson["audio"] != null
-                        ? IconButton(
-                            color: Colors.orange,
-                            icon: Icon(_lessonPlaying == lesson
-                                ? Icons.stop_circle_outlined
-                                : Icons.play_circle_outline),
-                            onPressed: () => _lessonPlaying == lesson
-                                ? _stopPlayingLesson()
-                                : _playLesson(lesson))
-                        : null,
-                  ),
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                      if (lesson["audio"] != null)
+                        IconButton(
+                          color: Colors.orange,
+                          icon: Icon(_lessonPlaying == lesson
+                              ? Icons.stop_circle_outlined
+                              : Icons.play_circle_outline),
+                          onPressed: () => _lessonPlaying == lesson
+                              ? _stopPlayingLesson()
+                              : _playLesson(lesson),
+                        ),
+                      if (lesson['page'] != null)
+                        IconButton(
+                            color: Colors.deepPurple,
+                            icon: Icon(Icons.topic_outlined),
+                            onPressed: () => _viewPage(lesson)),
+                    ]),
+                  )
               ],
             );
             if (_lessonPlaying == null) {
@@ -182,5 +164,57 @@ class _LessonList extends State<LessonListWidget> {
             );
           }
         });
+  }
+
+  void _viewPage(dynamic lesson) async {
+    String url = lesson['page'];
+    if (!await launch(url)) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Page Launcher'),
+              // To display the title it is optional
+              content: Text('Cannot open the given url "$url"'),
+              // Message which will be pop up on the screen
+              // Action widget which will provide the user to acknowledge the choice
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Ok', style: TextStyle(color: Colors.black)),
+                ),
+              ],
+            );
+          });
+    }
+  }
+
+  void _togglePause() {
+    setState(() {
+      if (_lessonPlayer.state == AudioPlayerState.PLAYING)
+        _lessonPlayer.pause();
+      else
+        _lessonPlayer.resume();
+    });
+  }
+
+  void _playLesson(dynamic lesson) {
+    _lessonPlayer.stop();
+    _audioCache.play(lesson["audio"]);
+    setState(() => _lessonPlaying = lesson);
+  }
+
+  void _stopPlayingLesson() {
+    _lessonPlayer.stop();
+    setState(() => _lessonPlaying = null);
+  }
+
+  @override
+  void dispose() {
+    _lessonPlayer.stop();
+    _lessonPlayer.dispose();
+    super.dispose();
   }
 }
