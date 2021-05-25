@@ -1,0 +1,52 @@
+###
+GET http://localhost:8080/userLocation
+
+###
+PUT http://localhost:8080/userLocation
+Content-Type: application/json
+Accept: */*
+Cache-Control: no-cache
+
+{"username":"10003","longitude":-121.92428,"latitude":37.45441}
+
+###
+GET http://localhost:8080/userLocation
+
+###
+PUT http://localhost:8080/userLocation
+Content-Type: application/json
+Accept: */*
+Cache-Control: no-cache
+
+{"username":"30009","longitude":-75.28512,"latitude":-12.73569}
+
+###
+GET http://localhost:8080/userLocation
+
+###
+PUT http://localhost:8080/userLocation
+Content-Type: application/json
+Accept: */*
+Cache-Control: no-cache
+
+{"username":"10003","longitude":-122.01537,"latitude":38.54330}
+
+###
+PUT http://localhost:8080/userLocation
+Content-Type: application/json
+Accept: */*
+Cache-Control: no-cache
+
+{"username":"30009","longitude":-74.39431,"latitude":-13.85751}
+
+###
+GET http://localhost:8080/userLocation
+
+###
+DELETE http://localhost:8080/userLocation/10003
+
+###
+DELETE http://localhost:8080/userLocation/30009
+
+###
+GET http://localhost:8080/userLocation

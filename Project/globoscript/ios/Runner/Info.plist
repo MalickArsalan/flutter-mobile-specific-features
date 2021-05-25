@@ -41,10 +41,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	 <key>NSAppTransportSecurity</key>
+	<!-- For the audioplayers and video_player plugins, so files can be accessed by URL -->
+	<key>NSAppTransportSecurity</key>
     <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
+      <key>NSAllowsArbitraryLoads</key>
+      <true/>
     </dict>
+	<!-- Always needs location information, when in use and in background -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Let us build a great community of GloboScript users!</string>
+	<!-- Only needs location information when in use -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Let us build a great community of GloboScript users!</string>
 </dict>
 </plist>
