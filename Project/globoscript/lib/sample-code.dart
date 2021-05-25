@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:location/location.dart';
 
 class SampleCodeWidget extends StatefulWidget {
   @override
@@ -9,152 +11,110 @@ class SampleCodeWidget extends StatefulWidget {
 }
 
 class _SampleCodeState extends State<SampleCodeWidget> {
-  bool forceSafariVC = false;
-  bool forceWebView = false;
-  bool enableJavaScript = false;
-  bool enableDomStorage = false;
-  // bool universalLinksOnly = false;
-  Brightness statusBarBrightness = Brightness.dark;
-  String urlString = "";
+  static const List<String> accuracyValues = <String>[
+    "powerSave",
+    "low",
+    "balanced",
+    "high",
+    "navigation"
+  ];
+
+  int _currentAccuracyValue = 3;
+  double _currentTimer = 3000.0;
+  double _currentDistance = 0.0;
+
+  Location _location;
+  StreamSubscription _locationSubscription;
+  LocationData _locationData;
+
+  @override
+  void initState() {
+    super.initState();
+    _location = new Location();
+  }
+
+  void toggleLocationUpdates() {
+    if (_locationSubscription == null) {
+      _locationSubscription = _location.onLocationChanged.listen(
+        (LocationData currentLocation) {
+          setState(() {
+            _locationData = currentLocation;
+          });
+        },
+      );
+    } else {
+      _locationSubscription.cancel();
+      _locationSubscription = null;
+    }
+  }
 
   Widget build(BuildContext context) {
+    _location.changeSettings(
+      accuracy: LocationAccuracy.values[_currentAccuracyValue],
+      interval: _currentTimer.toInt(),
+      distanceFilter: _currentDistance,
+    );
+
     return Column(
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.all(13.0),
-          child: TextField(
-            onChanged: (value) {
-              setState(() => urlString = value);
-            },
-            decoration: InputDecoration(
-              labelText: 'URL',
-              border: OutlineInputBorder(),
+      children: ListTile.divideTiles(
+        context: context,
+        tiles: <Widget>[
+          ListTile(
+            leading: Icon(Icons.architecture, color: Colors.orange),
+            title: Slider(
+              value: _currentAccuracyValue.toDouble(),
+              min: 0,
+              max: 4,
+              divisions: 4,
+              label: accuracyValues[_currentAccuracyValue],
+              onChanged: _locationSubscription != null
+                  ? null
+                  : (double value) {
+                      setState(() {
+                        _currentAccuracyValue = value.toInt();
+                      });
+                    },
             ),
           ),
-        ),
-        ListTile(
-          title: Text(
-            'forceSafariVC',
+          ListTile(
+            leading: Icon(Icons.timer, color: Colors.deepPurple),
+            title: Slider(
+              value: _currentTimer,
+              min: 1000.0,
+              max: 15 * 60 * 1000.0,
+              onChanged: _locationSubscription != null
+                  ? null
+                  : (double value) {
+                      setState(() {
+                        _currentTimer = value;
+                      });
+                    },
+            ),
+            trailing: Container(
+                width: 45.0,
+                child: Text(_currentTimer < 60000
+                    ? "${(_currentTimer / 1000.0).round()}sec"
+                    : "${(_currentTimer / 60000.0).round()}min")),
           ),
-          leading: Switch(
-              value: forceSafariVC,
-              activeColor: Color(Colors.blueAccent.value),
-              onChanged: (bool value) {
-                setState(() {
-                  forceSafariVC = value;
-                });
-              }),
-        ),
-        ListTile(
-          title: Text(
-            'forceWebView',
+          ListTile(
+          leading: Icon(Icons.adjust, color: Colors.lightGreen),
+          title: Slider(
+            value: _currentDistance,
+            min:0.0,
+            max: 1000.0,
+            onChanged: _locationSubscription != null ? null : (double value) {
+              setState(() {
+                _currentDistance = value;
+              });
+            },),
+          trailing: Container(
+              width: 45.0,
+              child: Text(_currentDistance < 1000 ? "${_currentDistance.toInt()}m" : "${(_currentDistance / 1000.0).round()}km")
           ),
-          leading: Switch(
-              value: forceWebView,
-              activeColor: Color(Colors.blueAccent.value),
-              onChanged: (bool value) {
-                setState(() {
-                  forceWebView = value;
-                });
-              }),
         ),
-        ListTile(
-          title: Text(
-            'enableJavaScript',
-          ),
-          leading: Switch(
-              value: enableJavaScript,
-              activeColor: Color(Colors.blueAccent.value),
-              onChanged: (bool value) {
-                setState(() {
-                  enableJavaScript = value;
-                });
-              }),
-        ),
-        ListTile(
-          title: Text(
-            'enableDomStorage',
-          ),
-          leading: Switch(
-              value: enableDomStorage,
-              activeColor: Color(Colors.blueAccent.value),
-              onChanged: (bool value) {
-                setState(() {
-                  enableDomStorage = value;
-                });
-              }),
-        ),
-        // ListTile(
-        //   title: Text(
-        //     'universalLinksOnly',
-        //   ),
-        //   leading: Switch(
-        //       value: universalLinksOnly,
-        //       activeColor: Color(Colors.blueAccent.value),
-        //       onChanged: (bool value) { setState(() { universalLinksOnly = value; }); }
-        //   ),
-        // ),
-        ListTile(
-          title: Text(
-            'statusBarBrightness',
-          ),
-          leading: Switch(
-              value: statusBarBrightness == Brightness.light,
-              activeColor: Color(Colors.black.value),
-              inactiveThumbColor: Color(Colors.white.value),
-              onChanged: (bool value) {
-                setState(() {
-                  statusBarBrightness = (statusBarBrightness == Brightness.light
-                      ? Brightness.dark
-                      : Brightness.light);
-                });
-              }),
-        ),
-        TextButton(
-          child: Text('Can Launch URL?'),
-          onPressed: () async {
-            bool isOk = await canLaunch(urlString);
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Can Launch the URL?"),
-                    content: Text(isOk ? "YES, PLEASE :)" : "NO, SORRY :("),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Ok',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  );
-                });
-          },
-        ),
-        FutureBuilder(
-            future: canLaunch(urlString),
-            builder: (context, snapshot) {
-              return TextButton(
-                  child: Text('Launch URL'),
-                  onPressed: snapshot.hasData && snapshot.data
-                      ? () {
-                          launch(
-                            urlString,
-                            forceSafariVC: forceSafariVC,
-                            statusBarBrightness: statusBarBrightness,
-                            forceWebView: forceWebView,
-                            enableJavaScript: enableJavaScript,
-                            enableDomStorage: enableDomStorage,
-                            // universalLinksOnly: universalLinksOnly,
-                          );
-                        }
-                      : null);
-            })
-      ],
+
+        ],
+      ).toList(),
     );
   }
 }
